@@ -1,0 +1,16 @@
+---
+source: tests/web_transport/tests/retry.rs
+expression: TRACING.get().unwrap().data()
+---
+ INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
+ INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
+ INFO client: Got response: pong
+ INFO client: Got response: pong
+ERROR protocol::web_transport::client: Client error: Communication error
+ INFO protocol::web_transport::client: Trying to reconnect to server
+ INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
+ INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
+ INFO client: Got response: pong
+ INFO client: Got response: pong
+ INFO client: Got response: pong
+

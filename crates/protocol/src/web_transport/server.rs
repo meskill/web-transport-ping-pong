@@ -6,6 +6,7 @@ use wtransport::{connection::Connecting, tls::Certificate, Endpoint, ServerConfi
 
 use crate::{web_transport::common::WebTransportCommunication, Handler, Server, ServerError};
 
+#[derive(Clone, Copy)]
 pub struct WebTransportServerConfig<T: AsRef<Path>> {
     pub path_to_certificate: T,
     pub path_to_key: T,

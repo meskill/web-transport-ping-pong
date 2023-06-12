@@ -1,6 +1,10 @@
-use std::net::{Ipv4Addr, SocketAddr};
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    time::Duration,
+};
 
 use async_trait::async_trait;
+use tokio::time::sleep;
 use wtransport::{ClientConfig, Endpoint};
 
 use crate::{Client, ClientError, Handler, WebTransportCommunication};
@@ -28,12 +32,26 @@ impl<H: Handler<WebTransportCommunication>> Client for WebTransportClient<H> {
 
         let endpoint = Endpoint::client(config)?;
 
-        let connect = endpoint.connect(address, &self.server_name)?.await?;
+        loop {
+            let result: Result<(), ClientError> = async {
+                let connect = endpoint.connect(address, &self.server_name)?.await?;
 
-        let (send, recv) = connect.open_bi().await?;
+                let (send, recv) = connect.open_bi().await?;
 
-        let communication = WebTransportCommunication::new(recv, send);
+                let communication = WebTransportCommunication::new(recv, send);
 
-        Ok(self.handler.handle(communication).await?)
+                Ok(self.handler.handle(communication).await?)
+            }
+            .await;
+
+            match result {
+                Ok(_) => return Ok(()),
+                Err(error) => {
+                    tracing::error!("Client error: {}", error);
+                    sleep(Duration::from_secs(1)).await;
+                    tracing::info!("Trying to reconnect to server");
+                }
+            }
+        }
     }
 }

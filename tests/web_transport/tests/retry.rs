@@ -4,7 +4,7 @@ use std::{
 };
 
 use insta::{assert_snapshot, with_settings};
-use tokio::{spawn, time::sleep};
+use tokio::{runtime::Runtime, spawn, time::sleep};
 
 use protocol::{Client, Server, WebTransportClient, WebTransportServer};
 
@@ -13,17 +13,30 @@ use crate::common::{init_tracing, SERVER_CONFIG};
 mod common;
 
 #[tokio::test]
-async fn should_do_ping_pong() {
+async fn client_should_reconnect_to_server() {
     let tracing = init_tracing();
     let address = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 4433);
 
     let server = WebTransportServer::new(SERVER_CONFIG, server::PingPongHandler);
     let client = WebTransportClient::new("localhost", client::PingPongHandler);
 
-    let server_handler = spawn(async move { server.listen(address).await });
     let client_handler = spawn(async move { client.connect(address).await });
 
-    sleep(Duration::from_millis(4500)).await;
+    let server_runtime = Runtime::new().unwrap();
+
+    server_runtime.spawn(async move { server.listen(address).await });
+
+    sleep(Duration::from_millis(1500)).await;
+    server_runtime.shutdown_background();
+
+    // wtransport doesn't support timeouts so we need some high value to see
+    // the actual error after server has shutdown
+    sleep(Duration::from_millis(12500)).await;
+
+    let server = WebTransportServer::new(SERVER_CONFIG, server::PingPongHandler);
+    let server_handler = spawn(async move { server.listen(address).await });
+
+    sleep(Duration::from_millis(2500)).await;
 
     client_handler.abort();
     server_handler.abort();
