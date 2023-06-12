@@ -55,3 +55,9 @@ Additional considerations to improve security:
 Current, implementation requires the client to provide ip address of the server in order to connect.
 
 To simplify management for the ip address we might use DNS-based solution to resolve url of the server to different ips. Depending on the requirements it could be global internet DNS or private DNS such as Kubernetes DNS.
+
+### Kubernetes deployment
+
+1. Use `client.Dockerfile`, `server.Dockerfile` to build images for client and server respectively
+2. Use `client.yaml`, `server.yaml` to push deploys to kubernetes cluster
+3. Additionally, apply changes to k8s configs to increase number of replicas or specify required resources for the deploys

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingpong-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingpong-client
+  template:
+    metadata:
+      labels:
+        app: pingpong-client
+    spec:
+      containers:
+        - name: pingpong-client
+          image: <docker-registry>/pingpong-client:<version>
+          env:
+            - name: PINGPONG_SERVER
+              # for current code it won't work as the code requires exact ip address
+              # and doesn't allow to specify it through env
+              value: 'http://pingpong-server:8080'

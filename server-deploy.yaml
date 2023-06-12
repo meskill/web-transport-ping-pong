@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingpong-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingpong-server
+  template:
+    metadata:
+      labels:
+        app: pingpong-server
+    spec:
+      containers:
+        - name: pingpong-server
+          image: <docker-regisry>/pingpong-server:<version>
+          ports:
+            - containerPort: 4433
+          volumeMounts:
+            - name: tls
+              mountPath: '/app/certs'
+              readOnly: true
+      volumes:
+        - name: tls
+          secret:
+            secretName: pingpong-server-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingpong-server
+spec:
+  selector:
+    app: pingpong-server
+  ports:
+    - protocol: TCP
+      port: 4433
+      targetPort: 4433
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pingpong-server-certificate
+spec:
+  secretName: pingpong-server-tls
+  dnsNames:
+    - pingpong-server.<namespace>.svc.cluster.local
+  issuerRef:
+    kind: ClusterIssuer
+    name: certificates-issuer
