@@ -50,21 +50,19 @@ impl WebTransportCommunication {
 
 #[async_trait]
 impl Communication for WebTransportCommunication {
-    async fn read(&mut self) -> Result<String, CommunicationError> {
+    async fn read(&mut self) -> Result<Vec<u8>, CommunicationError> {
         let Some(bytes_read) = self.recv.read(&mut self.buffer).await? else {
           // if we haven't read anything from stream then the stream is possible closed
           return Err(CommunicationError::StreamClosed);
         };
 
-        let s = String::from_utf8_lossy(&self.buffer[..bytes_read]);
-
-        Ok(s.into_owned())
+        Ok(Vec::from(&self.buffer[..bytes_read]))
     }
 
     async fn write(
         &mut self,
-        data: impl AsRef<str> + Send + Sync,
+        data: impl AsRef<[u8]> + Send + Sync,
     ) -> Result<(), CommunicationError> {
-        Ok(self.send.write_all(data.as_ref().as_bytes()).await?)
+        Ok(self.send.write_all(data.as_ref()).await?)
     }
 }

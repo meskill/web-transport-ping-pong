@@ -1,12 +1,12 @@
 ---
 source: tests/web_transport/tests/ping_pong.rs
-expression: writer.data()
+expression: tracing.data()
 ---
  INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
  INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
- INFO client: Got response: pong
- INFO client: Got response: pong
- INFO client: Got response: pong
- INFO client: Got response: pong
- INFO client: Got response: pong
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]
 

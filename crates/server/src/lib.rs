@@ -11,9 +11,9 @@ impl<T: Communication + 'static> Handler<T> for PingPongHandler {
         loop {
             let input = connection.read().await?;
 
-            let output = match &*input {
-                "ping" => "pong",
-                _ => "Excuse me, do you speak PingPongish?",
+            let output: &[u8] = match &*input {
+                b"ping" => b"pong",
+                _ => b"?",
             };
 
             connection.write(output).await?;
@@ -31,14 +31,14 @@ mod tests {
     use crate::PingPongHandler;
 
     pub struct MockCommunication {
-        read_data: Option<Result<String, CommunicationError>>,
+        read_data: Option<Result<Vec<u8>, CommunicationError>>,
         write_data: Option<Result<(), CommunicationError>>,
-        last_data: Arc<Mutex<Option<String>>>,
+        last_data: Arc<Mutex<Option<Vec<u8>>>>,
     }
 
     #[async_trait]
     impl Communication for MockCommunication {
-        async fn read(&mut self) -> Result<String, CommunicationError> {
+        async fn read(&mut self) -> Result<Vec<u8>, CommunicationError> {
             self.read_data
                 .take()
                 .unwrap_or(Err(CommunicationError::StreamClosed))
@@ -46,9 +46,9 @@ mod tests {
 
         async fn write(
             &mut self,
-            data: impl AsRef<str> + Send + Sync,
+            data: impl AsRef<[u8]> + Send + Sync,
         ) -> Result<(), CommunicationError> {
-            *self.last_data.lock().unwrap() = Some(data.as_ref().to_owned());
+            *self.last_data.lock().unwrap() = Some(data.as_ref().to_vec());
 
             self.write_data
                 .take()
@@ -60,7 +60,7 @@ mod tests {
     async fn should_response_on_ping() {
         let last_data = Arc::new(Mutex::new(None));
         let mock_communication = MockCommunication {
-            read_data: Some(Ok("ping".to_owned())),
+            read_data: Some(Ok(b"ping".to_vec())),
             write_data: Some(Ok(())),
             last_data: Arc::clone(&last_data),
         };
@@ -70,14 +70,14 @@ mod tests {
         let result = handler.handle(mock_communication).await;
 
         assert!(matches!(result, Err(CommunicationError::StreamClosed)));
-        assert_eq!(last_data.lock().unwrap().as_ref().unwrap(), "pong");
+        assert_eq!(last_data.lock().unwrap().as_ref().unwrap(), b"pong");
     }
 
     #[tokio::test]
     async fn should_response_on_unknown_message() {
         let last_data = Arc::new(Mutex::new(None));
         let mock_communication = MockCommunication {
-            read_data: Some(Ok("Unknown".to_owned())),
+            read_data: Some(Ok(b"Unknown".to_vec())),
             write_data: Some(Ok(())),
             last_data: Arc::clone(&last_data),
         };
@@ -87,10 +87,7 @@ mod tests {
         let result = handler.handle(mock_communication).await;
 
         assert!(matches!(result, Err(CommunicationError::StreamClosed)));
-        assert_eq!(
-            last_data.lock().unwrap().as_ref().unwrap(),
-            "Excuse me, do you speak PingPongish?"
-        );
+        assert_eq!(last_data.lock().unwrap().as_ref().unwrap(), b"?");
     }
 
     #[tokio::test]

@@ -12,11 +12,11 @@ pub struct PingPongHandler;
 impl<T: Communication + 'static> Handler<T> for PingPongHandler {
     async fn handle(&mut self, mut communication: T) -> Result<(), CommunicationError> {
         loop {
-            communication.write("ping").await?;
+            communication.write(b"ping").await?;
 
             let response = communication.read().await?;
 
-            tracing::info!("Got response: {response}");
+            tracing::info!("Got response: {response:?}");
 
             sleep(Duration::from_secs(1)).await;
         }
@@ -33,13 +33,13 @@ mod tests {
     use crate::PingPongHandler;
 
     pub struct MockCommunication {
-        read_data: Option<Result<String, CommunicationError>>,
-        last_data: Arc<Mutex<Option<String>>>,
+        read_data: Option<Result<Vec<u8>, CommunicationError>>,
+        last_data: Arc<Mutex<Option<Vec<u8>>>>,
     }
 
     #[async_trait]
     impl Communication for MockCommunication {
-        async fn read(&mut self) -> Result<String, CommunicationError> {
+        async fn read(&mut self) -> Result<Vec<u8>, CommunicationError> {
             self.read_data
                 .take()
                 .unwrap_or(Err(CommunicationError::StreamClosed))
@@ -47,7 +47,7 @@ mod tests {
 
         async fn write(
             &mut self,
-            data: impl AsRef<str> + Send + Sync,
+            data: impl AsRef<[u8]> + Send + Sync,
         ) -> Result<(), CommunicationError> {
             *self.last_data.lock().unwrap() = Some(data.as_ref().to_owned());
 
@@ -59,7 +59,7 @@ mod tests {
     async fn should_send_ping() {
         let last_data = Arc::new(Mutex::new(None));
         let mock_communication = MockCommunication {
-            read_data: Some(Ok("pong".to_owned())),
+            read_data: Some(Ok(b"pong".to_vec())),
             last_data: Arc::clone(&last_data),
         };
 
@@ -68,6 +68,6 @@ mod tests {
         let result = handler.handle(mock_communication).await;
 
         assert!(matches!(result, Err(CommunicationError::StreamClosed)));
-        assert_eq!(last_data.lock().unwrap().as_ref().unwrap(), "ping");
+        assert_eq!(last_data.lock().unwrap().as_ref().unwrap(), b"ping");
     }
 }

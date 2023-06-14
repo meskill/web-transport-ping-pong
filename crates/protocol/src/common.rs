@@ -46,10 +46,10 @@ pub trait Client {
 
 #[async_trait]
 pub trait Communication: Send + Sync {
-    async fn read(&mut self) -> Result<String, CommunicationError>;
+    async fn read(&mut self) -> Result<Vec<u8>, CommunicationError>;
     async fn write(
         &mut self,
-        data: impl AsRef<str> + Send + Sync,
+        data: impl AsRef<[u8]> + Send + Sync,
     ) -> Result<(), CommunicationError>;
 }
 
