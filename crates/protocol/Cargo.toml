@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.68"
-thiserror = "1.0.40"
-tokio = "1.28.2"
-tracing = "0.1.37"
-wtransport = { version = "0.1.1", features = ["dangerous-configuration"] }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+wtransport = { workspace = true }

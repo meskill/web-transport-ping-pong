@@ -1,2 +1,12 @@
 [workspace]
 members = ["crates/*", "tests/*"]
+
+[workspace.dependencies]
+async-trait = "0.1.68"
+insta = { version = "1.29.0", features = ["filters"] }
+protocol = { path = "../protocol" }
+thiserror = "1.0.40"
+tokio = { version = "1.28.2", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
+wtransport = { version = "0.1.1", features = ["dangerous-configuration"] }
