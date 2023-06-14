@@ -1,6 +1,8 @@
 use std::net::{Ipv4Addr, SocketAddr};
+use std::panic;
 
 use tokio::spawn;
+use tracing_panic::panic_hook;
 use tracing_subscriber::fmt::format::FmtSpan;
 
 use protocol::{Server, WebTransportServer, WebTransportServerConfig};
@@ -11,6 +13,8 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
         .init();
+
+    panic::set_hook(Box::new(panic_hook));
 
     let address = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 4433);
     let config = WebTransportServerConfig {
