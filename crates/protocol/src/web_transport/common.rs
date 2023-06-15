@@ -51,10 +51,7 @@ impl WebTransportCommunication {
 #[async_trait]
 impl Communication for WebTransportCommunication {
     async fn read(&mut self) -> Result<Vec<u8>, CommunicationError> {
-        let Some(bytes_read) = self.recv.read(&mut self.buffer).await? else {
-          // if we haven't read anything from stream then the stream is possible closed
-          return Err(CommunicationError::StreamClosed);
-        };
+        let bytes_read = self.recv.read(&mut self.buffer).await?.unwrap_or(0);
 
         Ok(Vec::from(&self.buffer[..bytes_read]))
     }
