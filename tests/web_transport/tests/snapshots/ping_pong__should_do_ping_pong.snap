@@ -1,6 +1,6 @@
 ---
 source: tests/web_transport/tests/ping_pong.rs
-expression: tracing.data()
+expression: "tracing.data().lines().take(10).collect::<Vec<&str>>().join(\"\\n\")"
 ---
  INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
  INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
@@ -9,4 +9,6 @@ expression: tracing.data()
  INFO client: Got response: [112, 111, 110, 103]
  INFO client: Got response: [112, 111, 110, 103]
  INFO client: Got response: [112, 111, 110, 103]
-
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]
+ INFO client: Got response: [112, 111, 110, 103]

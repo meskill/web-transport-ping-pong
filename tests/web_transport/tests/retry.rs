@@ -26,17 +26,17 @@ async fn client_should_reconnect_to_server() {
 
     server_runtime.spawn(async move { server.listen(address).await });
 
-    sleep(Duration::from_millis(1500)).await;
+    sleep(Duration::from_millis(50)).await;
     server_runtime.shutdown_background();
 
     // wtransport doesn't support timeouts so we need some high value to see
     // the actual error after server has shutdown
-    sleep(Duration::from_millis(12500)).await;
+    sleep(Duration::from_millis(11000)).await;
 
     let server = WebTransportServer::new(SERVER_CONFIG, server::PingPongHandler);
     let server_handler = spawn(async move { server.listen(address).await });
 
-    sleep(Duration::from_millis(2500)).await;
+    sleep(Duration::from_millis(150)).await;
 
     client_handler.abort();
     server_handler.abort();
@@ -45,6 +45,7 @@ async fn client_should_reconnect_to_server() {
       filters => vec![
        (r":4433", ":[server_port]"),
        (r":\d+", ":[client_port]"),
+       (r"( INFO client: Got response: \[112, 111, 110, 103\]\n)+", " INFO [communication]\n")
       ]
      }, {
       assert_snapshot!(tracing.data());

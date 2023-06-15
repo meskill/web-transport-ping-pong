@@ -23,7 +23,7 @@ async fn should_do_ping_pong() {
     let server_handler = spawn(async move { server.listen(address).await });
     let client_handler = spawn(async move { client.connect(address).await });
 
-    sleep(Duration::from_millis(4500)).await;
+    sleep(Duration::from_millis(100)).await;
 
     client_handler.abort();
     server_handler.abort();
@@ -34,6 +34,6 @@ async fn should_do_ping_pong() {
        (r":\d+", ":[client_port]"),
       ]
      }, {
-      assert_snapshot!(tracing.data());
+      assert_snapshot!(tracing.data().lines().take(10).collect::<Vec<&str>>().join("\n"));
     });
 }

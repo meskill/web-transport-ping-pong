@@ -1,7 +1,4 @@
-use std::time::Duration;
-
 use async_trait::async_trait;
-use tokio::time::sleep;
 
 use protocol::{Communication, CommunicationError, Handler};
 
@@ -17,8 +14,6 @@ impl<T: Communication + 'static> Handler<T> for PingPongHandler {
             let response = communication.read().await?;
 
             tracing::info!("Got response: {response:?}");
-
-            sleep(Duration::from_secs(1)).await;
         }
     }
 }

@@ -4,13 +4,10 @@ expression: tracing.data()
 ---
  INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
  INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
- INFO client: Got response: [112, 111, 110, 103]
- INFO client: Got response: [112, 111, 110, 103]
+ INFO [communication]
 ERROR protocol::web_transport::client: Client error: Communication error
  INFO protocol::web_transport::client: Trying to reconnect to server
  INFO protocol::web_transport::server: Server started on 127.0.0.1:[server_port]
  INFO protocol::web_transport::server: New connection from: 127.0.0.1:[client_port]
- INFO client: Got response: [112, 111, 110, 103]
- INFO client: Got response: [112, 111, 110, 103]
- INFO client: Got response: [112, 111, 110, 103]
+ INFO [communication]
 

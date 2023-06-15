@@ -1,10 +1,6 @@
-use std::{
-    net::{Ipv4Addr, SocketAddr},
-    time::Duration,
-};
+use std::net::{Ipv4Addr, SocketAddr};
 
 use async_trait::async_trait;
-use tokio::time::sleep;
 use wtransport::{ClientConfig, Endpoint};
 
 use crate::{Client, ClientError, Handler, WebTransportCommunication};
@@ -48,7 +44,6 @@ impl<H: Handler<WebTransportCommunication>> Client for WebTransportClient<H> {
                 Ok(_) => return Ok(()),
                 Err(error) => {
                     tracing::error!("Client error: {}", error);
-                    sleep(Duration::from_secs(1)).await;
                     tracing::info!("Trying to reconnect to server");
                 }
             }
